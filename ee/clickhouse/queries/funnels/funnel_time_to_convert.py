@@ -24,7 +24,7 @@ class ClickhouseFunnelTimeToConvert(ClickhouseFunnelNew):
             ), (
                 -- Automatic bin interval which makes sure that there's always number_of_bins bins
                 -- and that each step run will belong to one bin in results
-                SELECT ceil(max(step_{to_step}_average_conversion_time) / {number_of_bins}) AS bin_base_seconds FROM step_runs
+                SELECT ceil(max(step_{to_step}_conversion_time) / {number_of_bins}) AS bin_base_seconds FROM step_runs
             ) AS bin_base_seconds
             SELECT
                 bin_to_seconds,
@@ -32,10 +32,10 @@ class ClickhouseFunnelTimeToConvert(ClickhouseFunnelNew):
             FROM (
                 -- Calculating bins from step runs
                 SELECT
-                    floor(step_{to_step}_average_conversion_time / bin_base_seconds + 1) * bin_base_seconds AS bin_to_seconds,
+                    floor(step_{to_step}_conversion_time / bin_base_seconds + 1) * bin_base_seconds AS bin_to_seconds,
                     count() AS person_count
                 FROM step_runs
-                WHERE step_{to_step}_average_conversion_time IS NOT NULL
+                WHERE step_{to_step}_conversion_time IS NOT NULL
                 GROUP BY bin_to_seconds
             ) results
             FULL OUTER JOIN (
